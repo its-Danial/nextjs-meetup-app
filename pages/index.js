@@ -1,30 +1,33 @@
+import { MongoClient } from "mongodb";
+
 import MeetupList from "../components/meetups/MeetupList";
 
-const dummy_data = [
-  {
-    id: "m1",
-    image: "https://t3.ftcdn.net/jpg/02/73/66/48/360_F_273664892_U8dmBDEYUpaM3GstFWbSmPWKCPGh2h8M.jpg",
-    title: "first",
-    address: "address",
-  },
-  {
-    id: "m2",
-    image: "https://t3.ftcdn.net/jpg/02/73/66/48/360_F_273664892_U8dmBDEYUpaM3GstFWbSmPWKCPGh2h8M.jpg",
-    title: "first",
-    address: "address",
-  },
-];
-
-const HomePage = (props) => {
+function HomePage(props) {
   return <MeetupList meetups={props.meetups} />;
-};
+}
 
-export const getStaticProps = async () => {
+export async function getStaticProps() {
+  // fetch data from an API
+  const client = await MongoClient.connect("mongodb://localhost:27017/meetupDB");
+  const db = client.db();
+
+  const meetupsCollection = db.collection("meetups");
+
+  const meetups = await meetupsCollection.find().toArray();
+
+  client.close();
+
   return {
     props: {
-      meetups: dummy_data,
+      meetups: meetups.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString(),
+      })),
     },
+    revalidate: 1,
   };
-};
+}
 
 export default HomePage;
