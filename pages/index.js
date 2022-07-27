@@ -6,7 +6,7 @@ function HomePage(props) {
   return <MeetupList meetups={props.meetups} />;
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   // fetch data from an API
   const client = await MongoClient.connect("mongodb://localhost:27017/meetupDB");
   const db = client.db();
@@ -26,7 +26,6 @@ export async function getStaticProps() {
         id: meetup._id.toString(),
       })),
     },
-    revalidate: 1,
   };
 }
 
